@@ -1,6 +1,8 @@
-module.exports = {
+export default {
   eslint: {
     ignoreDuringBuilds: true,
-    instrumentationHook: false
+  },
+  experimental: {
+    instrumentationHook: false,
   },
 };
