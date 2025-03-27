@@ -2,12 +2,23 @@ import { Suspense } from "react";
 import MovieInfo, { getMovie } from "../../../../components/movie-info";
 import MovieVideos from "../../../../components/movie-videos";
 
-// ⛔ 타입 선언 X – 직접 구조분해해서 타입추론 유도
-export default async function MovieDetail({
-  params,
-}: {
-  params: { id: string };
-}) {
+// ✅ generateStaticParams는 선택이지만, 타입 추론을 위해 있으면 가장 안전함
+export async function generateStaticParams() {
+  return [{ id: "1" }, { id: "2" }]; // 예시 값들
+}
+
+type ParamsProps = Awaited<ReturnType<typeof generateStaticParams>>[number];
+
+// ✅ generateMetadata 타입 추론 맞게 적용
+export async function generateMetadata({ params }: { params: ParamsProps }) {
+  const movie = await getMovie(params.id);
+  return {
+    title: movie.title,
+  };
+}
+
+// ✅ page 컴포넌트도 동일한 타입 적용
+export default async function MovieDetail({ params }: { params: ParamsProps }) {
   const { id } = params;
 
   return (
@@ -20,12 +31,4 @@ export default async function MovieDetail({
       </Suspense>
     </div>
   );
-}
-
-// ✅ 타입 충돌 피하기 위한 정석적인 우회 방법
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const movie = await getMovie(params.id);
-  return {
-    title: movie.title,
-  };
 }
