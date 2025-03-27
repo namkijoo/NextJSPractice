@@ -2,24 +2,20 @@ import { Suspense } from "react";
 import MovieInfo, { getMovie } from "../../../../components/movie-info";
 import MovieVideos from "../../../../components/movie-videos";
 
-// ✅ generateStaticParams는 선택이지만, 타입 추론을 위해 있으면 가장 안전함
-export async function generateStaticParams() {
-  return [{ id: "1" }, { id: "2" }]; // 예시 값들
-}
+// 타입을 Promise로 처리하는 새로운 방식 (Next.js 15 기준)
+type IParams = Promise<{ id: string }>;
 
-type ParamsProps = Awaited<ReturnType<typeof generateStaticParams>>[number];
+export async function generateMetadata(props: { params: IParams }) {
+  const { id } = await props.params;
+  const movie = await getMovie(id);
 
-// ✅ generateMetadata 타입 추론 맞게 적용
-export async function generateMetadata({ params }: { params: ParamsProps }) {
-  const movie = await getMovie(params.id);
   return {
     title: movie.title,
   };
 }
 
-// ✅ page 컴포넌트도 동일한 타입 적용
-export default async function MovieDetail({ params }: { params: ParamsProps }) {
-  const { id } = params;
+export default async function MovieDetailPage(props: { params: IParams }) {
+  const { id } = await props.params;
 
   return (
     <div>
